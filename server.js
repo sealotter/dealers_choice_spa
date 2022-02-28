@@ -3,6 +3,10 @@ const app = express()
 const Sequelize = require('sequelize')
 const conn = new Sequelize(process.env.DATABASE_URL || `postgres://postgres:banana794@localhost/food_spa`)
 const {UUID,UUIDV4,STRING} = Sequelize
+const path = require('path')
+
+
+app.use('/dist', express.static(path.join(__dirname, 'dist')))
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, "index.html")))
 
@@ -19,6 +23,16 @@ app.get('/api/foods', async(req, res, next) => {
     }
 })
 
+app.delete('/api/foods/:id', async(req,res,next) => {
+    try{
+        const foods =await Food.findByPk(req.params.id)
+        await foods.destroy();
+        res.sendStatus(204)
+        
+    }catch(ex){
+        next(ex)
+    }
+})
 
 
 const Food = conn.define('food', {
